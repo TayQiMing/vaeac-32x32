@@ -35,13 +35,20 @@ parser.add_argument('--train_dataset', type=str, action='store',
                     required=True,
                     help='Dataset of images for training VAEAC to inpaint ' +
                          '(see load_datasets function in datasets.py).')
-
+parser.add_argument('--mask_dataset', type=str, action='store',
+                    required=True,
+                    help='Dataset of images for training VAEAC to inpaint ' +
+                         '(see load_datasets function in datasets.py).')
 parser.add_argument('--validation_dataset', type=str, action='store',
                     required=True,
                     help='Dataset of validation images for VAEAC ' +
                          'log-likelihood IWAE estimate ' +
                          '(see load_datasets function in datasets.py).')
-
+parser.add_argument('--validation_mask_dataset', type=str, action='store',
+                    required=True,
+                    help='Dataset of validation images for VAEAC ' +
+                         'log-likelihood IWAE estimate ' +
+                         '(see load_datasets function in datasets.py).')
 parser.add_argument('--validation_iwae_num_samples', type=int, action='store',
                     default=25,
                     help='Number of samples per object to estimate IWAE ' +
@@ -86,13 +93,21 @@ mask_generator = model_module.mask_generator
 
 # load train and validation datasets
 train_dataset = load_dataset(args.train_dataset)
+mask_dataset = load_dataset(args.mask_dataset)
 validation_dataset = load_dataset(args.validation_dataset)
+validation_mask_dataset = load_dataset(args.validation_mask_dataset)
 
 # build dataloaders on top of datasets
 dataloader = DataLoader(train_dataset, batch_size=batch_size,
                         shuffle=True, drop_last=False,
                         num_workers=num_workers)
+mask_dataloader = DataLoader(mask_dataset, batch_size=batch_size,
+                        shuffle=True, drop_last=False,
+                        num_workers=num_workers)
 val_dataloader = DataLoader(validation_dataset, batch_size=batch_size,
+                            shuffle=True, drop_last=False,
+                            num_workers=num_workers)
+val_mask_dataloader = DataLoader(validation_mask_dataset, batch_size=batch_size,
                             shuffle=True, drop_last=False,
                             num_workers=num_workers)
 
@@ -142,11 +157,16 @@ def make_checkpoint():
 for epoch in range(args.epochs):
 
     iterator = dataloader
+    mask_iterator = mask_dataloader
     avg_vlb = 0
     if verbose:
         print('Epoch %d...' % (epoch + 1), file=stderr, flush=True)
         iterator = tqdm(iterator)
-
+        
+    temp_mask=[]
+    for i, mask in enumerate(mask_iterator):
+      temp_mask.append(mask)
+      
     # one epoch
     for i, batch in enumerate(iterator):
 
@@ -157,7 +177,7 @@ for epoch in range(args.epochs):
                     i % validation_batches == validation_batches - 1,
                     i + 1 == len(dataloader)
                 ]):
-            val_iwae = get_validation_iwae(val_dataloader, mask_generator,
+            val_iwae = get_validation_iwae(val_dataloader, val_mask_dataloader,
                                            batch_size, model,
                                            args.validation_iwae_num_samples,
                                            verbose)
@@ -189,7 +209,8 @@ for epoch in range(args.epochs):
         batch = extend_batch(batch, dataloader, batch_size)
 
         # generate mask and do an optimizer step over the mask and the batch
-        mask = mask_generator(batch)
+#         mask = mask_generator(batch)
+        mask = temp_mask[i]
         optimizer.zero_grad()
         if use_cuda:
             batch = batch.cuda()
