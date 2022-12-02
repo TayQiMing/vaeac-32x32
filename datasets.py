@@ -178,6 +178,14 @@ def load_dataset(name):
             'train',
             celeba_transforms
         )
+    elif name == 'celeba_train_mask':
+        # in order to speed up training we restrict validation set
+        # to have only 1024 images
+        return CelebA(
+            '/content/myworking_dir/train_mask_img',
+            '/content/train_mask.txt',
+            'train',
+            celeba_transforms)
     elif name == 'celeba_val':
         # in order to speed up training we restrict validation set
         # to have only 1024 images
@@ -186,7 +194,23 @@ def load_dataset(name):
             celeba_partition,
             'valid',
             celeba_transforms), 1024)
+    elif name == 'celeba_val_mask':
+        # in order to speed up training we restrict validation set
+        # to have only 1024 images
+        return LengthBounder(CelebA(
+            celeba_img_dir,
+            celeba_partition,
+            'valid',
+            celeba_transforms), 1024)
     elif name == 'celeba_test':
+        # in order to demonstrate the inpainting results we don't need
+        # the whole test set, so we use 256 test images only
+        return LengthBounder(CelebA(
+            celeba_img_dir,
+            celeba_partition,
+            'test',
+            celeba_transforms), 256)
+    elif name == 'celeba_test_mask':
         # in order to demonstrate the inpainting results we don't need
         # the whole test set, so we use 256 test images only
         return LengthBounder(CelebA(
