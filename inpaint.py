@@ -127,7 +127,7 @@ for batch_tuple in iterator:
 
         # save groundtruth image
         save_img(groundtruth,
-                 join(args.out_dir, '%05d_groundtruth.jpg' % image_num))
+                 join(args.out_dir, '%05d_groundtruth.png' % image_num))
 
         # to show mask on the model input we use gray color
         model_input_visualization = torch.tensor(groundtruth)
@@ -135,7 +135,7 @@ for batch_tuple in iterator:
 
         # save model input visualization
         save_img(model_input_visualization,
-                 join(args.out_dir, '%05d_input.jpg' % image_num))
+                 join(args.out_dir, '%05d_input.png' % image_num))
 
         # in the model input the unobserved part is zeroed
         model_input = torch.tensor(groundtruth)
@@ -146,7 +146,7 @@ for batch_tuple in iterator:
             sample[1 - mask.byte()] = 0
             sample += model_input
             sample_filename = join(args.out_dir,
-                                   '%05d_sample_%03d.jpg' % (image_num, i))
+                                   '%05d_sample_%03d.png' % (image_num, i))
             save_img(sample, sample_filename)
 
         image_num += 1
