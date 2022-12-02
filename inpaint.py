@@ -79,8 +79,8 @@ model.load_state_dict(checkpoint['model_state_dict'])
 
 # load images and masks datasets, build a dataloader on top of them
 dataset = load_dataset(args.dataset)
-masks = load_dataset(args.masks)
-dataloader = DataLoader(ZipDatasets(dataset, masks), batch_size=batch_size,
+mask_dataset = load_dataset(args.masks)
+dataloader = DataLoader(ZipDatasets(dataset, mask_dataset), batch_size=batch_size,
                         shuffle=False, drop_last=False,
                         num_workers=num_workers)
 
