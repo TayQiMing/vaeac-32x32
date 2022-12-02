@@ -163,7 +163,7 @@ def load_dataset(name):
     and generated masks for the test part.
     """
     celeba_transforms = Compose([
-        CenterCrop(128),
+#         CenterCrop(128),
         ToTensor(),
         Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
     ])
