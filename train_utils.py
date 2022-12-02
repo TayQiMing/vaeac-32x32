@@ -34,7 +34,7 @@ def extend_batch_tuple(batch, dataloader, batch_size):
     return batch
 
 
-def get_validation_iwae(val_dataloader, mask_generator, batch_size,
+def get_validation_iwae(val_dataloader, val_mask_dataloader, batch_size,
                         model, num_samples, verbose=False):
     """
     Compute mean IWAE log likelihood estimation of the validation set.
@@ -45,12 +45,20 @@ def get_validation_iwae(val_dataloader, mask_generator, batch_size,
     cum_size = 0
     avg_iwae = 0
     iterator = val_dataloader
+    mask_iterator = val_mask_dataloader
+    temp_mask=[]
+    for i, mask in enumerate(mask_iterator):
+      temp_mask.append(mask)
+    
     if verbose:
         iterator = tqdm(iterator)
-    for batch in iterator:
+    for i, batch in enumerate(iterator):
         init_size = batch.shape[0]
         batch = extend_batch(batch, val_dataloader, batch_size)
-        mask = mask_generator(batch)
+#         mask = mask_generator(batch)
+        mask = temp_mask[i]
+        mask = extend_batch(mask, val_mask_dataloader, batch_size)
+        
         if next(model.parameters()).is_cuda:
             batch = batch.cuda()
             mask = mask.cuda()
