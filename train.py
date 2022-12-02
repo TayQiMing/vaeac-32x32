@@ -211,6 +211,7 @@ for epoch in range(args.epochs):
         # generate mask and do an optimizer step over the mask and the batch
 #         mask = mask_generator(batch)
         mask = temp_mask[i]
+        mask = extend_batch(mask, mask_dataloader, batch_size)
         optimizer.zero_grad()
         if use_cuda:
             batch = batch.cuda()
